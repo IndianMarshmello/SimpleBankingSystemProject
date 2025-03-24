@@ -24,6 +24,17 @@ class Bank {
         
         */
 
+        /*
+        void Signup() {
+            
+        }
+
+        void Login() {
+
+        }
+        */
+        //
+
         ~Bank() {};
 };
 
