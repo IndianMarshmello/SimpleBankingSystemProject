@@ -1,13 +1,16 @@
 #include <iostream>
 #include <string>
 #include <map>
+#include <iomanip>
+//#include <cmath> // might need
 
 class User {
     private:
         std::string username;
         std::string password;
-        int money;
-    
+        double money; //should use double instead of int
+                   // I have to figure out how to make the double stop after two decimals (because thats how MONEY WORKS!!!)
+                   // I should probably get started ;-;
         /*
         Other methods
         */
@@ -18,7 +21,7 @@ class User {
         User(std::string u, std::string p) {
             this->username = u;
             this->password = p;
-            this->money = 100;
+            this->money = 100.00;
         }
     
         /*
@@ -33,18 +36,22 @@ class User {
             return password;
         }
 
-        int checkBalance() {
+        double checkBalance() {
             return money;
         }
 
-        int withdrawal(int n) {
+
+        // withdrawing or depositing more than 2 decimals places (i.e. 0.001) adds up still,
+        // it just doesn't display on the "Bank terminal"
+        // fix maybe, at some point.
+        double withdrawal(double n) {
 
             money-=n;
 
             return money;
         }
 
-        int deposit(int n) {
+        double deposit(double n) {
             money+=n;
 
             return money;
@@ -91,24 +98,22 @@ class Bank {
                             << "\n4) logout"
                             << "\n: ";
                     std::cin >> option;
-                    int amount;
+                    double amount;
                     switch(option) {
                         case '1':
-                            std::cout << "\n\nCurrent balance: " << current.checkBalance() << std::endl;
+                            std::cout << "\n\nCurrent balance: " << std::fixed << std::setprecision(2) << current.checkBalance() << std::endl;
                             break;
                         case '2':
                             std::cout << "Withdrawal amount: ";
                             std::cin >> amount;
 
-                            amount = current.withdrawal(amount);
-                            std::cout << "\n\nNew balance: " << amount << std::endl;
+                            std::cout << "\n\nNew balance: " << std::fixed << std::setprecision(2) << current.withdrawal(amount) << std::endl;
                             break;
                         case '3':
                             std::cout << "Deposit amount: ";
                             std::cin >> amount;
 
-                            amount = current.deposit(amount);
-                            std::cout << "\n\nNew balance: " << amount << std::endl;
+                            std::cout << "\n\nNew balance: " << std::fixed << std::setprecision(2) << current.deposit(amount) << std::endl;
                             break;
                         case '4':
                             gay = false;
@@ -172,7 +177,7 @@ class Bank {
             return currentUser;
         }
         
-        //
+        // WORK ON ERROR CORRECTION at somepoint ;-;
 
         ~Bank() {};
 };
