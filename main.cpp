@@ -80,6 +80,7 @@ class Bank {
                 bool gay = true;
                 while(gay) {
                     // going back in terminal menus will always be -1
+                    // ^ that was hard cap, I did NOT use -1 to go back in terminal menus LOL
                     
                     // need to make getters and setters like checking balance, and adding balance to account aka deposit and withdrawal.
                     char option;
@@ -88,26 +89,26 @@ class Bank {
                             << "\n2) withdrawal"
                             << "\n3) deposit"
                             << "\n4) logout"
-                            << "\n: " << std::endl;
+                            << "\n: ";
                     std::cin >> option;
                     int amount;
                     switch(option) {
                         case '1':
-                            current.checkBalance();
+                            std::cout << "\n\nCurrent balance: " << current.checkBalance() << std::endl;
                             break;
                         case '2':
                             std::cout << "Withdrawal amount: ";
                             std::cin >> amount;
 
                             amount = current.withdrawal(amount);
-                            std::cout << "\n\nNew balance: " << amount;
+                            std::cout << "\n\nNew balance: " << amount << std::endl;
                             break;
                         case '3':
-                            std::cout << "Depost amount: ";
+                            std::cout << "Deposit amount: ";
                             std::cin >> amount;
 
                             amount = current.deposit(amount);
-                            std::cout << "\n\nNew balance: " << amount;
+                            std::cout << "\n\nNew balance: " << amount << std::endl;
                             break;
                         case '4':
                             gay = false;
@@ -148,6 +149,9 @@ class Bank {
         }
 
         User Login() {
+            // get username and password as inputs and than search the map
+            // for a User with the username and than match the password,
+            // if correct, the User is "Logged In"
             std::string name;
             std::string pass;
             std::cout << "What is your username?: ";
@@ -158,7 +162,7 @@ class Bank {
             User currentUser = it->second;
             if (it == accounts.end()) {
                 std::cerr << "Username not found" << std::endl;
-                return User();  // Return a default user or handle error properly
+                return User();  // Return a default user (or handle error properly but I'm too lazy, lowkey)
             }
             if(currentUser.getPassword() != pass) {
                 std::cerr << "password incorrect" << std::endl;
@@ -172,34 +176,6 @@ class Bank {
 
         ~Bank() {};
 };
-
-
-
-// void textPrompt() {
-//     std::cout << "\nWelcome to the Login screen" << std::endl;
-//     std::cout << "Here you will be prompted to login\nor if you do not have an account,\nyou may enter \"signup\" in the username field\n" << std::endl;
-// }
-
-// int loginToBank() {
-//     std::string tempname;
-//     std::string temppass;
-//     textPrompt();
-//     std::cout << "Username: ";
-//     std::cin >> tempname;
-//     if (tempname == "signup") {
-//         /*
-//             call signup function when I make it
-//         */
-//
-//         return 0;
-//     }
-//     std::cout << "\n\nPassword: ";
-//     std::cin >> temppass;
-//     return 0;
-// }
-
-
-
 
 
 int main() {
