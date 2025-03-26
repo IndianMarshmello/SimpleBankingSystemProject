@@ -14,43 +14,44 @@ class User {
     public:
     
         User() {};
-        User(std::string u, std::string p) {
-            this->username = u;
-            this->password = p;
-            this->money = 100.00;
-        }
+        User(std::string u, std::string p);
+        User(std::string u, std::string p, double m);
         
         /*
         Other methods
         */
 
-        std::string getUsername() {
-            return username;
-        }
+        std::string getUsername() {return username;}
 
-        std::string getPassword() {
-            return password;
-        }
+        std::string getPassword() {return password;}
 
-        double checkBalance() {
-            return money;
-        }
+        double checkBalance() {return money;}
 
-        double withdrawal(double n) {
+        double withdrawal(double n);
 
-            money-=n;
-
-            return money;
-        }
-
-        double deposit(double n) {
-            money+=n;
-
-            return money;
-        }
-
-
-    
+        double deposit(double n);
+        
         ~User() {};
 };
 
+User::User(std::string u, std::string p) {
+    this->username = u;
+    this->password = p;
+    this->money = 100.00;
+}
+
+User::User(std::string u, std::string p, double m) {
+    username=u;
+    password=p;
+    money=m;
+}
+
+double User::withdrawal(double n) {
+    money-=n;
+    return money;
+}
+
+double User::deposit(double n) {
+    money+=n;
+    return money;
+}
