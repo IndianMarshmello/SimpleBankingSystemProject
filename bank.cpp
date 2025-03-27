@@ -60,6 +60,7 @@ void Bank::loadBank() {
         bool Logged_In = true;
         while(Logged_In) {
             homepage(currentUserPtr);
+            delete currentUserPtr;
             break;
         }
     }
@@ -398,7 +399,7 @@ void Bank::transferMoney(User* userPtr) {
         std::cout << "\n\nInsufficient funds";
         return homepage(userPtr);
     }
-    
+
     User* transferiePtr = retUser(who);
     if (transferiePtr == nullptr) {
         std::cout << "\n\nCould not transfer money, try again later.";
