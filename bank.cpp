@@ -4,11 +4,13 @@
 #include <iomanip>
 #include <fstream>
 #include <sstream>
+#include <vector>
 #include "user.cpp"
 
 class Bank {
 private:
     int currentID = 9999;
+    bool running = true;
 public:
 
     Bank();
@@ -33,6 +35,10 @@ public:
 
     void homepage(User* userPtr);
 
+    User* parseLine(const std::string &line);
+
+    void updateMoney(User* userPtr);
+
     void transferMoney();
 
     void displayAccounts();
@@ -46,7 +52,17 @@ Bank::Bank() {
 }
 
 void Bank::loadBank() {
-    User* currentUserPtr = landing();
+    while(running) {
+        User* currentUserPtr = landing();
+        if (currentUserPtr == nullptr) {
+            break;
+        }
+        bool Logged_In = true;
+        while(Logged_In) {
+            homepage(currentUserPtr);
+            break;
+        }
+    }
     // runs the banks
 }
 
@@ -59,15 +75,20 @@ User* Bank::landing() {
               << "\nOr sign up?"
               << "\n1) log in"
               << "\n2) sign up"
+              << "\n3) quit program"
               << "\n: ";
     std::cin >> option;
 
-    if (option == '1') {
-        return login();
-    } else if (option == '2') {
-        return setup();
-    } else {
-        return landing();
+    switch(option) {
+        case '1':
+            return login();
+        case '2':
+            return setup();
+        case '3':
+            return nullptr;
+        default:
+            return landing();
+
     }
 }
 
@@ -98,7 +119,6 @@ User* Bank::setup() {
             }
         }
     }
-
 
     // add the account to the database (i.e. "users.csv")
     std::ofstream file("users.csv", std::ios::app);
@@ -164,7 +184,7 @@ User* Bank::login() {
            std::getline(ss, dMoney)) {
             if((dUsername==username)&&(dPassword==password)) {
                 std::cout << "\nLogged In" << std::endl;
-                User* userPtr = new User(dUsername, dPassword, std::stod(dMoney));
+                User* userPtr = new User(std::stoi(ID), dUsername, dPassword, std::stod(dMoney));
                 file.close();
                 return userPtr;
             }
@@ -218,7 +238,113 @@ void Bank::homepage(User* userPtr) {
     // create the terminal menu
     // after the user is 'logged in'
     // provide options like 'view balance', 'deposit', 'withdrawal', and 'transfer'
+    char option;
+    std::cout << "\n\nPick an option to navigate the menu (1,2,3,4)"
+            << "\n1) check balance"
+            << "\n2) withdrawal"
+            << "\n3) deposit"
+            << "\n4) transfer"
+            << "\n5) logout"
+            << "\n6) quit program"
+            << "\n: ";
+    std::cin >> option;
+    double amount;
+    switch(option) {
+        case '1':
+            std::cout << "\nAccount: " << userPtr->getUsername()
+                    << "\nCurrent balance: " << std::fixed << std::setprecision(2) << userPtr->checkBalance();
+            
+            homepage(userPtr);
+            break;
+        case '2':
+            std::cout << "\nAccount: " << userPtr->getUsername()
+                    << "\nWithdrawal amount: ";
+            std::cin >> amount;
 
+            std::cout << "\nAccount: " << userPtr->getUsername()
+                    << "\nNew balance: " << userPtr->withdrawal(amount);
+            updateMoney(userPtr);
+            homepage(userPtr);
+            break;
+        case '3':
+            std::cout << "\nAccount: " << userPtr->getUsername()
+                    << "\nDeposit amount: ";
+            std::cin >> amount;
+
+            std::cout << "\n\nAccount: " << userPtr->getUsername()
+                    << "\nNew balance: " << userPtr->deposit(amount);
+            updateMoney(userPtr);
+            homepage(userPtr);
+            break;
+        //replace with transfer when made
+        case '5':
+            break;
+        case '6':
+            running = false;
+            break;
+        default:
+            std::cout << "\n\nINVALID OPTION" << std::endl;
+            homepage(userPtr);
+            break;
+
+    }
+    
+
+}
+
+User* Bank::parseLine(const std::string &line) {
+    std::stringstream ss(line);
+    std::string ID, dUsername, dPassword, dMoney;
+
+    std::getline(ss, ID, ',');
+    std::getline(ss, dUsername, ',');
+    std::getline(ss, dPassword, ',');
+    std::getline(ss, dMoney);
+    User* entry = new User(std::stoi(ID), dUsername, dPassword, std::stod(dMoney));
+    return entry;
+}
+
+void Bank::updateMoney(User* userPtr) {
+    int targetID=userPtr->getID();
+    double newMoney = userPtr->checkBalance();
+    std::ifstream file("users.csv");
+    if (!file.is_open()) {
+        std::cerr << "\nError opening file!\n";
+        return;
+    }
+
+    std::vector<std::string> lines;
+    std::string line;
+
+    if (std::getline(file, line)) {
+        lines.push_back(line);
+    }
+
+    while (std::getline(file, line)) {
+        User* entryPtr = parseLine(line);
+        if (entryPtr->getID() == targetID) {
+            entryPtr->setMoney(newMoney);
+        }
+
+        std::ostringstream updateLine;
+        updateLine << entryPtr->getID() << ',' << entryPtr->getUsername() << ',' << entryPtr->getPassword() << ',' << entryPtr->checkBalance();
+        lines.push_back(updateLine.str());
+        delete entryPtr;
+    }
+
+    file.close();
+
+    std::ofstream outFile("users.csv");
+    if (!outFile.is_open()) {
+        std::cerr << "\nError writing file!\n";
+        return;
+    }
+
+    for (const auto &l:lines) {
+        outFile << l << "\n";
+    }
+
+    outFile.close();
 }
 
 void Bank::transferMoney() {
