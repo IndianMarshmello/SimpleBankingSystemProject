@@ -27,7 +27,7 @@ public:
 
     void insUser();
 
-    void retUser();
+    User* retUser(std::string username);
 
     User* login();
 
@@ -39,7 +39,7 @@ public:
 
     void updateMoney(User* userPtr);
 
-    void transferMoney();
+    void transferMoney(User* userPtr);
 
     void displayAccounts();
 
@@ -149,8 +149,32 @@ void Bank::insUser() { // insert user into database (lowkey, might be setup.....
 
 }
 
-void Bank::retUser() { // retrieve user (from database) (In hindsight, this might be just logging in, but we will see.)
-
+User* Bank::retUser(std::string username) { // retrieve user (from database) (In hindsight, this might be just logging in, but we will see.)
+    // search the database
+    std::ifstream file("users.csv");
+    if (!file.is_open()) {
+        std::cerr << "\nError opening file!";
+        return nullptr;
+    }
+    std::string line;
+    getline(file, line);
+    while (getline(file, line)) {
+        std::stringstream ss(line);
+        std::string ID, dUsername, dPassword, dMoney;
+        
+        if(std::getline(ss, ID, ',')&&
+           std::getline(ss, dUsername, ',')&&
+           std::getline(ss, dPassword, ',')&&
+           std::getline(ss, dMoney)) {
+            if((dUsername==username)) {
+                User* userPtr = new User(std::stoi(ID), dUsername, dPassword, std::stod(dMoney));
+                file.close();
+                return userPtr;
+            }
+        }
+    }
+    file.close();
+    return nullptr;
 }
 
 User* Bank::login() {
@@ -276,7 +300,9 @@ void Bank::homepage(User* userPtr) {
             updateMoney(userPtr);
             homepage(userPtr);
             break;
-        //replace with transfer when made
+        case '4':
+            transferMoney(userPtr);
+            break;
         case '5':
             break;
         case '6':
@@ -347,10 +373,47 @@ void Bank::updateMoney(User* userPtr) {
     outFile.close();
 }
 
-void Bank::transferMoney() {
+void Bank::transferMoney(User* userPtr) {
+    std::string who;
+    std::cout << "\n\nWho are you transferring money to? (username only)\n: ";
+    std::cin >> who;
+
+    if (who == userPtr->getUsername()) {
+        std::cout << "\n\nYou can't transfer money to yourself" << std::endl;
+        return transferMoney(userPtr);
+    }
+    double amount;
+    while(true) {
+        std::cout << "\n\nHow much would you like to transfer?\n: ";
+        std::cin >> amount;
+
+        if(amount < 0) {
+            std::cout << "\n\nCannot transfer negative number" << std::endl;
+            continue;
+        }
+        break;
+    }
+
+    if(userPtr->checkBalance() < amount) {
+        std::cout << "\n\nInsufficient funds";
+        return homepage(userPtr);
+    }
+    
+    User* transferiePtr = retUser(who);
+    if (transferiePtr == nullptr) {
+        std::cout << "\n\nCould not transfer money, try again later.";
+        return homepage(userPtr);
+    }
+
+    userPtr->withdrawal(amount);
+    transferiePtr->deposit(amount);
+    updateMoney(userPtr);
+    updateMoney(transferiePtr);
+    std::cout << "\n\nMoney transfer successful" << std::endl;
+    delete transferiePtr;
+    return homepage(userPtr);
     // for transferring money
     // between users/accounts (users or accounts, call it what you like :P)
-
 }
 
 void Bank::displayAccounts() {
